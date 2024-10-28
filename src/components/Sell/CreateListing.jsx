@@ -4,6 +4,7 @@ import { GiSteeringWheel } from "react-icons/gi"; // Import GiSteeringWheel
 import Navbar from "../Navbar";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../firebase-config";
+import Footer from "../Footer";
 
 const FeedbackForm = () => {
   const [image, setImage] = useState(null);
@@ -197,6 +198,7 @@ const FeedbackForm = () => {
           </form>
         </div>
       </div>
+      <Footer/>
     </>
   );
 };

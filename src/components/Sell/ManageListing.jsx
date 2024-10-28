@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../Navbar";
+import Footer from "../Footer";
 
 const ManageListing = () => {
   const [listings, setListings] = useState([
@@ -48,6 +49,7 @@ const ManageListing = () => {
         </tbody>
       </table>
     </div>
+    <Footer/>
     </>
   );
 };
