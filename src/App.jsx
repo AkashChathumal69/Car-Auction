@@ -11,12 +11,20 @@ import ManageListing from "./components/Sell/ManageListing";
 import { PrivateRouteLogin } from "./utils/PrivateRoute"; // Correct import statement
 import PrivateRoute from "./utils/PrivateRoute"; // Correct import statement
 import ImageUpload from "./Function/imageUploader";
+import AuctionPage from "./components/Buy/BiddingDetail/AuctionPage";
+import CarAuctionListing from "./components/Buy/BiddingDetail/CarAuctionListing";
+import WatchList from "./components/Buy/WatchList";
+
+
 const App = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/about" element={<About />} />
       <Route path="/cars" element={<Cars />} />
+      <Route path="/auction" element={<AuctionPage />} />
+      <Route path="/car-detail/:carId" element={<CarAuctionListing />} />
+      <Route path="/watchlist" element={<WatchList />} />
       <Route
         path="/sell"
         element={

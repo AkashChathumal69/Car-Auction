@@ -23,16 +23,16 @@ const Footer = () => {
               About Us
             </Link>
             <Link
-              to="/cars"
+              to="/auction"
               className=" hover:translate-x-3 transition duration-200 ease-linear"
             >
-              Our Cars
+              Live Auction
             </Link>
             <Link
-              to="/services"
+              to="/car-detail/:carId"
               className=" hover:translate-x-3 transition duration-200 ease-linear"
             >
-              Services
+              Bid Now
             </Link>
           </div>
         </div>
