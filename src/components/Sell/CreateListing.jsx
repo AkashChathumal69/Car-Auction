@@ -1,15 +1,30 @@
-import { useState } from "react";
-// import { CameraIcon } from "@heroicons/react/16/solid";
-import { GiSteeringWheel } from "react-icons/gi"; // Import GiSteeringWheel
+import { useState, useContext } from "react";
+import { GiSteeringWheel } from "react-icons/gi";
 import Navbar from "../Navbar";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../firebase-config";
-import Footer from "../Footer";
+import AuthContext from "../../Context/AuthContext";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const FeedbackForm = () => {
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState({
+    brand: "",
+    model: "",
+    year: "",
+    engineCapacity: "",
+    mileage: "",
+    description: "",
+    bidAmmount: "",
+    endTime: "", // New endTime field
+  });
 
   const handleImageChange = (e) => {
     if (e.target.files[0]) {
@@ -20,48 +35,68 @@ const FeedbackForm = () => {
   const handleUpload = async () => {
     if (!image) {
       setError("Please select an image first");
-      return;
+      return null;
     }
-
     try {
       setUploading(true);
       setError("");
-
-      // Create a unique filename
       const filename = `${Date.now()}-${image.name}`;
-
-      // Create a reference to the file location in Firebase Storage
       const storageRef = ref(storage, `images/${filename}`);
-
-      // Upload the file
       const snapshot = await uploadBytes(storageRef, image);
-
-      // Get the download URL
-      const downloadUrl = await getDownloadURL(snapshot.ref);
-
-      setFormData(downloadUrl);
+      const imageURL = await getDownloadURL(snapshot.ref);
       setImage(null);
-
-      // Reset file input
       const fileInput = document.querySelector('input[type="file"]');
       if (fileInput) fileInput.value = "";
+      return imageURL;
     } catch (error) {
       console.error("Error uploading image:", error);
       setError("Failed to upload image. Please try again.");
+      return null;
     } finally {
       setUploading(false);
     }
   };
 
-  const [formData, setFormData] = useState({
-    brand: "",
-    model: "",
-    year: "",
-    engineCapacity: "",
-    mileage: "",
-    description: "",
-    downloadUrl: "",
-  });
+  const CreateAuction = async (formData, imageURL) => {
+    try {
+      const response = await fetch("http://localhost:5175/api/actions/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user}`, // Add the access token to the request headers
+        },
+        body: JSON.stringify({
+          brand: formData.brand,
+          year: formData.year,
+          description: formData.description,
+          auctionImage: imageURL,
+          model: formData.model,
+          mileage: formData.mileage,
+          startingBid: parseFloat(formData.bidAmmount),
+          endTime: formData.endTime, // Pass selected endTime to the backend
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        Swal.fire({
+          title: "Auction Created!",
+          text: "Your auction has been created successfully.",
+          icon: "success",
+          confirmButtonText: "Go to Auctions",
+        }).then(() => navigate("/AuctionList"));
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      Swal.fire({
+        title: "Error",
+        text: `Failed to create auction: ${error.message}. Please try again.`,
+        icon: "error",
+        confirmButtonText: "Close",
+      });
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -70,10 +105,12 @@ const FeedbackForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    handleUpload();
+    const imageURL = await handleUpload();
+    if (imageURL) {
+      await CreateAuction(formData, imageURL);
+    }
   };
 
   return (
@@ -82,80 +119,29 @@ const FeedbackForm = () => {
       <Navbar />
       <div className="flex flex-col-reverse justify-center md:flex-row items-center gap-5 mt-14">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Feedback Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Heading with Icon */}
             <div className="flex flex-col items-center mb-6">
-              <GiSteeringWheel size={32} className="text-primary" />{" "}
-              {/* Icon */}
-              <h1 className="text-2xl font-bold text-center">
-                Create Listing
-              </h1>{" "}
-              {/* Topic Heading */}
+              <GiSteeringWheel size={32} className="text-primary" />
+              <h1 className="text-2xl font-bold text-center">Create Listing</h1>
             </div>
-
-            <div>
-              <label className="block font-medium">Brand</label>
-              <input
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                className="shadow appearance-none border rounded w-[200%] py-2 px-3 text-gray-700 leading-tight"
-                placeholder="Enter brand"
-                required
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Model</label>
-              <input
-                type="text"
-                name="model"
-                value={formData.model}
-                onChange={handleChange}
-                className="shadow appearance-none border rounded w-[200%] py-2 px-3 text-gray-700 leading-tight"
-                placeholder="Enter model"
-                required
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Manufacture Year</label>
-              <input
-                type="number"
-                name="year"
-                value={formData.year}
-                onChange={handleChange}
-                className="shadow appearance-none border rounded w-[200%] py-2 px-3 text-gray-700 leading-tight"
-                placeholder="Enter year"
-                required
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Engine Capacity</label>
-              <input
-                type="text"
-                name="engineCapacity"
-                value={formData.engineCapacity}
-                onChange={handleChange}
-                className="shadow appearance-none border rounded w-[200%] py-2 px-3 text-gray-700 leading-tight"
-                placeholder="Enter engine capacity"
-                required
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Mileage</label>
-              <input
-                type="text"
-                name="mileage"
-                value={formData.mileage}
-                onChange={handleChange}
-                className="shadow appearance-none border rounded w-[200%] py-2 px-3 text-gray-700 leading-tight"
-                placeholder="Enter mileage"
-                required
-              />
-            </div>
-
-            {/* Cover Photo Upload Section */}
+            {["brand", "model", "year", "engineCapacity", "mileage"].map(
+              (field, idx) => (
+                <div key={idx}>
+                  <label className="block font-medium capitalize">
+                    {field}
+                  </label>
+                  <input
+                    type={field === "year" ? "number" : "text"}
+                    name={field}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
+                    placeholder={`Enter ${field}`}
+                    required
+                  />
+                </div>
+              )
+            )}
             <label htmlFor="cover-photo" className="block font-medium">
               Cover photo
             </label>
@@ -166,39 +152,59 @@ const FeedbackForm = () => {
                   onChange={handleImageChange}
                   accept="image/*"
                   className="block w-full text-sm text-gray-500
-        file:mr-4 file:py-2 file:px-4
-        file:rounded-md file:border-0
-        file:text-sm file:font-semibold
-        file:bg-blue-50 file:text-blue-700
-        hover:file:bg-blue-100
-      "
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-md file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-50 file:text-blue-700
+                      hover:file:bg-blue-100"
                   disabled={uploading}
                 />
               </div>
             </div>
-
+            <div>
+              <label className="block font-medium">Start Bid Amount:</label>
+              <input
+                type="number"
+                name="bidAmmount"
+                value={formData.bidAmmount}
+                onChange={handleChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
+                placeholder="Enter Starting Bid Value"
+                required
+              />
+            </div>
             <div>
               <label className="block font-medium">Description</label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                className="shadow appearance-none border rounded w-[200%] py-2 px-3 text-gray-700 leading-tight"
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
                 placeholder="Enter description"
+                required
+              />
+            </div>
+            <div>
+              <label className="block font-medium">End Time</label>
+              <input
+                type="datetime-local"
+                name="endTime"
+                value={formData.endTime}
+                onChange={handleChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
                 required
               />
             </div>
             <button
               type="submit"
               className="bg-blue-500 text-white p-2 rounded"
-              onClick={handleSubmit}
+              disabled={uploading}
             >
-              Submit Listing
+              {uploading ? "Uploading..." : "Submit Listing"}
             </button>
           </form>
         </div>
       </div>
-      <Footer/>
     </>
   );
 };

@@ -134,7 +134,9 @@ export const AuthProvider = ({ children }) => {
       if (response.status === 200) {
         navigate("/login");
       } else {
-        throw new Error(data.error);
+        console.error("Registration error:", data);
+        const errorMessages = data.map((error) => error.description).join("\n");
+        alert(`Registration failed:\n${errorMessages}`);
       }
     } catch (error) {
       console.error("Registration error:", error);

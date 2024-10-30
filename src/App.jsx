@@ -14,7 +14,7 @@ import ImageUpload from "./Function/imageUploader";
 import AuctionPage from "./components/Buy/BiddingDetail/AuctionPage";
 import CarAuctionListing from "./components/Buy/BiddingDetail/CarAuctionListing";
 import WatchList from "./components/Buy/WatchList";
-
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const App = () => {
   return (
@@ -24,6 +24,10 @@ const App = () => {
       <Route path="/cars" element={<Cars />} />
       <Route path="/auction" element={<AuctionPage />} />
       <Route path="/car-detail/:carId" element={<CarAuctionListing />} />
+      <Route
+        path="/paymet-success/:checkoutSession"
+        element={<PaymentSuccess />}
+      />
       <Route path="/watchlist" element={<WatchList />} />
       <Route
         path="/sell"
