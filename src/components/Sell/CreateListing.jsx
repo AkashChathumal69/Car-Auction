@@ -83,7 +83,7 @@ const FeedbackForm = () => {
           text: "Your auction has been created successfully.",
           icon: "success",
           confirmButtonText: "Go to Auctions",
-        }).then(() => navigate("/AuctionList"));
+        }).then(() => navigate("/auction"));
       } else {
         throw new Error(data.error);
       }

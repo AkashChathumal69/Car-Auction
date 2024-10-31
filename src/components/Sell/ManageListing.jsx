@@ -75,7 +75,7 @@ const ManageListing = () => {
               <tr key={listing.auctionId}>
                 <td className="border p-2">{listing.brand}</td>
                 <td className="border p-2">{listing.model}</td>
-                <td className="border p-2">{listing.year || "N/A"}</td>
+                <td className="border p-2">{listing.year}</td>
                 <td className="border p-2">{listing.mileage}</td>
                 <td className="border p-2">
                   <Link

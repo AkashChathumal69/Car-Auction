@@ -15,6 +15,8 @@ import AuctionPage from "./components/Buy/BiddingDetail/AuctionPage";
 import CarAuctionListing from "./components/Buy/BiddingDetail/CarAuctionListing";
 import WatchList from "./components/Buy/WatchList";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import AdminPage from "./components/Buy/BiddingDetail/AdminPage";
+import AdminLogin from "./components/AdminLogin";
 
 const App = () => {
   return (
@@ -39,6 +41,8 @@ const App = () => {
       />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/imageUpload" element={<ImageUpload />} />
+      <Route path="/Admin" element={<AdminPage />} />
+      <Route path="/Adminlogin" element={<AdminLogin />} />
       <Route
         path="/login"
         element={
